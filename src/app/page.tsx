@@ -129,7 +129,7 @@ export default function Home() {
           八卦解密
         </h1>
         <p className="text-muted-foreground text-center">
-          使用古老的易经八卦符号进行现代加密和解密
+          使用八卦符号进行加密和解密
         </p>
 
         <Tabs defaultValue="encrypt" className="w-full">
