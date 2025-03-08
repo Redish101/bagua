@@ -126,7 +126,7 @@ export default function Home() {
     <main className="container mx-auto py-10 px-4 md:px-6">
       <div className="flex flex-col items-center space-y-6 max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold tracking-tight text-center">
-          八卦解密
+          八卦加密
         </h1>
         <p className="text-muted-foreground text-center">
           使用八卦符号进行加密和解密
