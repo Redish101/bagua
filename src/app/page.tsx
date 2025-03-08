@@ -20,8 +20,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
-
-// 八卦汉字映射表
 type Trigrams = Record<string, string>;
 const trigramMap: Trigrams = {
   "111": "乾",
@@ -34,7 +32,6 @@ const trigramMap: Trigrams = {
   "000": "坤",
 };
 
-// 反转映射表用于解密
 type ReverseTrigrams = Record<string, string>;
 const reverseTrigramMap: ReverseTrigrams = Object.entries(trigramMap).reduce(
   (acc: ReverseTrigrams, [key, value]) => {
@@ -44,15 +41,18 @@ const reverseTrigramMap: ReverseTrigrams = Object.entries(trigramMap).reduce(
   {},
 );
 
-// 加密函数
+// 加密函数（改进版）
 function encrypt(text: string): string {
   if (!text) return "";
 
-  // 转换为16位二进制字符串
+  // 使用UTF-8编码获取字节数组
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(text);
+
+  // 转换为二进制字符串
   let binaryStr = "";
-  for (const char of text) {
-    const code = char.charCodeAt(0);
-    binaryStr += code.toString(2).padStart(16, "0");
+  for (const byte of bytes) {
+    binaryStr += byte.toString(2).padStart(8, "0");
   }
 
   // 补充位数使总长度为3的倍数
@@ -63,7 +63,7 @@ function encrypt(text: string): string {
   const trigrams: string[] = [];
   for (let i = 0; i < binaryStr.length; i += 3) {
     const trio = binaryStr.substr(i, 3);
-    trigrams.push(trigramMap[trio] || "");
+    trigrams.push(trigramMap[trio]);
   }
 
   // 添加补位信息卦象
@@ -72,7 +72,7 @@ function encrypt(text: string): string {
   return trigrams.join("");
 }
 
-// 解密函数
+// 解密函数（改进版）
 function decrypt(trigramStr: string): string {
   if (!trigramStr) return "";
 
@@ -98,24 +98,24 @@ function decrypt(trigramStr: string): string {
       binaryStr = binaryStr.slice(0, -padding);
     }
 
-    // 验证二进制长度
-    if (binaryStr.length % 16 !== 0) {
+    // 验证二进制长度是否为8的倍数
+    if (binaryStr.length % 8 !== 0) {
       throw new Error("无效加密内容");
     }
 
-    // 转换为原始文本
-    let result = "";
-    for (let i = 0; i < binaryStr.length; i += 16) {
-      const byte = binaryStr.substr(i, 16);
-      result += String.fromCharCode(Number.parseInt(byte, 2));
+    // 转换为字节数组
+    const bytes = new Uint8Array(binaryStr.length / 8);
+    for (let i = 0; i < binaryStr.length; i += 8) {
+      const byteStr = binaryStr.substr(i, 8);
+      bytes[i / 8] = parseInt(byteStr, 2);
     }
 
-    return result;
+    // 解码为原始文本
+    return new TextDecoder().decode(bytes);
   } catch (e) {
-    return `解密失败：无效卦象序列(${e})`;
+    return `解密失败：${e}`;
   }
 }
-
 export default function Home() {
   const [inputText, setInputText] = useState<string>("");
   const [encrypted, setEncrypted] = useState<string>("");
